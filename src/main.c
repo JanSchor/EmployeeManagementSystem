@@ -4,9 +4,36 @@
 #include <string.h>
 #include "employee.h"
 
+#define MAX_NAME_LENGTH 50
+#define MAX_FILE_NAME_LENGTH 50
+#define MAX_FILE_PATH_LENGTH 100
+#define MAX_FILE_LINE_LENGTH 100
+
 int numOfEmployees = 0;
 Employee employeeList[100];
 
+
+int isIdUnique(int id) {
+    for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
+        if (employeeList[empIdx].id == id) return 0;
+    }
+    return 1;
+}
+
+void getInputDigit(char inputText[100], int* destination) {
+    printf("%s", inputText);
+    while (scanf("%d", destination) != 1) {
+        while (getchar() != '\n');
+        printf("Invalid input, please enter a number: ");
+    }
+}
+
+int lowestPossibleId() {
+    for (int empIdx = 0; numOfEmployees+1; empIdx++) {
+        if (isIdUnique(empIdx)) return empIdx;
+    }
+    return -1;
+}
 
 void printMainMenu() {
     printf(
@@ -23,23 +50,25 @@ void printMainMenu() {
 
 void addEmployee() {
     int id;
-    char name[50];
+    char name[MAX_NAME_LENGTH];
     int age;
     float salary;
 
     // ID
-    printf("Enter employee ID: "); // need to search for unique ID
-    scanf("%d", &id);
+    while (1) {
+        getInputDigit("Enter employee ID: ", &id);
+        if (isIdUnique(id)) break;
+        printf("This id is already taken! Recommended id: %d\n", lowestPossibleId());
+    }
 
     // Name
     printf("Enter employee name: ");
     while (getchar() != '\n');
-    fgets(name, 50, stdin);
+    fgets(name, MAX_NAME_LENGTH, stdin);
     name[strcspn(name, "\n")] = '\0';
 
     // Age
-    printf("Enter employee age: ");
-    scanf("%d", &age);
+    getInputDigit("Enter employee age: ", &age);
 
     // Salary
     printf("Enter employee salary: ");
@@ -65,8 +94,7 @@ void displayEmployees() {
 
 int searchEmployeeById() {
     int searchedId;
-    printf("Enter employee ID to search: ");
-    scanf("%d", &searchedId);
+    getInputDigit("Enter employee ID to search: ", &searchedId);
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
         if (employeeList[empIdx].id == searchedId) {
             return empIdx;
@@ -76,8 +104,8 @@ int searchEmployeeById() {
 }
 
 void saveToFile() {
-    char fileNameH[32];
-    char fileNameSave[50];
+    char fileNameH[MAX_FILE_NAME_LENGTH];
+    char fileNameSave[MAX_FILE_NAME_LENGTH+16];
     printf("Enter file name: ");
     scanf("%s", fileNameH);
     sprintf(fileNameSave, "./files/%s.txt", fileNameH);
@@ -93,65 +121,61 @@ void saveToFile() {
 }
 
 void loadFromFile() {
-    char loadFileName[50];
+    char loadFilePath[MAX_FILE_PATH_LENGTH];
     printf("Enter file path: ");
-    scanf("%s", loadFileName);
-    FILE* fileLoad = fopen(loadFileName, "r");
+    scanf("%s", loadFilePath);
+    FILE* fileLoad = fopen(loadFilePath, "r");
     if (!fileLoad) {
         printf("Failed to load the file!\n");
         return;
     }
 
-    char fileLine[100];
+    char fileLine[MAX_FILE_LINE_LENGTH];
     int id;
     int age;
-    char name[50];
+    char name[MAX_NAME_LENGTH];
     float salary;
     Employee* newEmployee;
+
+    char formatString[50];
+    sprintf(formatString, "%%d|%%%d[^|]|%%d|%%f", MAX_NAME_LENGTH-1);
+
+    int linesLoaded = 0;
+    int linesNotLoaded = 0;
     while (fgets(fileLine, sizeof(fileLine), fileLoad)) {
-        if (sscanf(fileLine, "%d|%49[^|]|%d|%f", &id, name, &age, &salary) == 4) {
-            newEmployee = Create_employee(id, name, age, salary);
-            employeeList[numOfEmployees] = *newEmployee;
-            numOfEmployees++;
+        if (sscanf(fileLine, formatString, &id, name, &age, &salary) == 4) {
+            if (isIdUnique(id)) {
+                newEmployee = Create_employee(id, name, age, salary);
+                employeeList[numOfEmployees] = *newEmployee;
+                numOfEmployees++;
+                linesLoaded++;
+            } else {
+                linesNotLoaded++;
+                fprintf(stderr, "Employee with this id already exists: %s", fileLine);
+            }
         } else {
-            fprintf(stderr, "Invalid line detected: \"%s\"", fileLine);
+            linesNotLoaded++;
+            fprintf(stderr, "Invalid line detected: %s", fileLine);
         }
     }
+    printf("Lines succesfully loaded: %d\n", linesLoaded);
+    printf("Lines that failed to load: %d\n", linesNotLoaded);
 }
 
 int main() {
-    
-    /*
-    Employee* newEmployee = Create_employee(0, "John Doe", 20, 65000);
-    if (newEmployee != NULL) {
-        employeeList[numOfEmployees] = *newEmployee;
-        printf("Employee added successfully");
-        numOfEmployees++;
-    }
-    newEmployee = Create_employee(1, "Michael Scott", 30, 20000);
-    if (newEmployee != NULL) {
-        employeeList[numOfEmployees] = *newEmployee;
-        printf("Employee added successfully");
-        numOfEmployees++;
-    }
-    */
     int choice;
     int searchedEmployeeIdx;
     while (1) {
         printMainMenu();
-        printf("Enter your choice: ");
-        while (scanf("%d", &choice) != 1) {
-            while (getchar() != '\n');
-            printf("Invalid input. Please enter a number: ");  
-        }
+        getInputDigit("Enter your choice: ", &choice);
         switch(choice) {
-            case 1:
+            case 1: // Add
                 addEmployee();
                 break;
-            case 2:
+            case 2: // Display
                 displayEmployees();
                 break;
-            case 3:
+            case 3: // Search
                 searchedEmployeeIdx = searchEmployeeById();
                 if (searchedEmployeeIdx == -1) {
                     printf("No employee with this ID found!\n");
@@ -166,12 +190,10 @@ int main() {
             case 5: // Load
                 loadFromFile();
                 break;
-            case 6:
+            case 6: // Exit
                 printf("Goodbye!\n");
-                // destroy all structs
                 return 0;
-                break;
-            default:
+            default: // Invalid
                 printf("Invalid choice, try again!\n");
                 choice = 0;
                 break;
@@ -179,3 +201,13 @@ int main() {
     }
     return 0;
 }
+
+
+/*
+Handle these errors:
+
+name to be less than 50 chars
+name to not contain pipe character
+salary to be float or number
+extra chars at digit input
+*/

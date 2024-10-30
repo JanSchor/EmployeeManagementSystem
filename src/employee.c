@@ -23,6 +23,7 @@ Employee* Create_employee(int id, char name[50], int age, float salary) {
 void Destroy_employee(Employee* employee) {
     if (employee) {
         free(employee);
+        employee = NULL;
     }
 }
 
