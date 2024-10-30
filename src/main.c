@@ -75,14 +75,66 @@ int searchEmployeeById() {
     return -1;
 }
 
+void saveToFile() {
+    char fileNameH[32];
+    char fileNameSave[50];
+    printf("Enter file name: ");
+    scanf("%s", fileNameH);
+    sprintf(fileNameSave, "./files/%s.txt", fileNameH);
+    FILE* fileSave = fopen(fileNameSave, "w");
+    for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
+        fprintf(fileSave, "%d|%s|%d|%f\n",
+            employeeList[empIdx].id, employeeList[empIdx].name,
+            employeeList[empIdx].age, employeeList[empIdx].salary
+        );
+    }
+    fclose(fileSave);
+    printf("File created succesfully!\n");
+}
+
+void loadFromFile() {
+    char loadFileName[50];
+    printf("Enter file path: ");
+    scanf("%s", loadFileName);
+    FILE* fileLoad = fopen(loadFileName, "r");
+    if (!fileLoad) {
+        printf("Failed to load the file!\n");
+        return;
+    }
+
+    char fileLine[100];
+    int id;
+    int age;
+    char name[50];
+    float salary;
+    Employee* newEmployee;
+    while (fgets(fileLine, sizeof(fileLine), fileLoad)) {
+        if (sscanf(fileLine, "%d|%49[^|]|%d|%f", &id, name, &age, &salary) == 4) {
+            newEmployee = Create_employee(id, name, age, salary);
+            employeeList[numOfEmployees] = *newEmployee;
+            numOfEmployees++;
+        } else {
+            fprintf(stderr, "Invalid line detected: \"%s\"", fileLine);
+        }
+    }
+}
+
 int main() {
     
-    Employee *newEmployee = Create_employee(0, "John Doe", 20, 65000);
+    /*
+    Employee* newEmployee = Create_employee(0, "John Doe", 20, 65000);
     if (newEmployee != NULL) {
         employeeList[numOfEmployees] = *newEmployee;
         printf("Employee added successfully");
         numOfEmployees++;
     }
+    newEmployee = Create_employee(1, "Michael Scott", 30, 20000);
+    if (newEmployee != NULL) {
+        employeeList[numOfEmployees] = *newEmployee;
+        printf("Employee added successfully");
+        numOfEmployees++;
+    }
+    */
     int choice;
     int searchedEmployeeIdx;
     while (1) {
@@ -108,9 +160,11 @@ int main() {
                     printEmployeeInfo(&employeeList[searchedEmployeeIdx]);
                 }
                 break;
-            case 4:
+            case 4: // Save
+                saveToFile();
                 break;
-            case 5:
+            case 5: // Load
+                loadFromFile();
                 break;
             case 6:
                 printf("Goodbye!\n");
