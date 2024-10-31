@@ -1,0 +1,10 @@
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define MAX_NAME_LENGTH 50
+#define MAX_FILE_NAME_LENGTH 50
+#define MAX_FILE_PATH_LENGTH 100
+#define MAX_FILE_LINE_LENGTH 100
+
+#endif // CONFIG_H

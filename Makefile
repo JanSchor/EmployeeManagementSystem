@@ -1,5 +1,5 @@
 mainFileName = main
-srcFiles = src/main.c src/employee.c
+srcFiles = src/main.c src/employee.c src/help_lib.c
 flags = -std=c11 -Wall -Wextra -Werror
 
 all: main
