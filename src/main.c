@@ -1,13 +1,13 @@
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "help_lib.h"
 
 
 int main() {
-    int choice;
     int end = 0;
+    if (initEmployeeList()) end = 1;
+    int choice;
+    
     while (!end) {
         printMainMenu();
         getInputDigit("Enter your choice: ", &choice);

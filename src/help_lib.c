@@ -1,12 +1,37 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "help_lib.h"
 #include "employee.h"
 #include "config.h"
 
 int numOfEmployees = 0;
-Employee employeeList[100];
+//Employee employeeList[100];
+Employee* employeeList = NULL;
+
+int initEmployeeList() {
+    employeeList = (Employee*)malloc(sizeof(Employee)*10);
+    if (!employeeList) {
+        fprintf(stderr, "Failed to allocate memory for employeeList!\n");
+        return 1;
+    }
+    return 0;
+}
+
+void addEmployeeToList(Employee* employee) {
+    static int allocationSize = 10;
+    if (numOfEmployees >= allocationSize) {
+        allocationSize *= 2;
+        employeeList = (Employee*)realloc(employeeList, sizeof(Employee) * allocationSize);
+        if (!employeeList) {
+            fprintf(stderr, "Failed to allocate memory for employeeList, employee not added!\n");
+        }
+    }
+    employeeList[numOfEmployees] = *employee;
+    numOfEmployees++;
+    printf("Employee added successfully");
+}
 
 int isIdUnique(int id) {
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
@@ -71,9 +96,8 @@ void addEmployee() {
 
     Employee *newEmployee = Create_employee(id, name, age, salary);
     if (newEmployee != NULL) {
-        employeeList[numOfEmployees] = *newEmployee;
-        printf("Employee added successfully");
-        numOfEmployees++;
+        //employeeList[numOfEmployees] = *newEmployee;
+        addEmployeeToList(newEmployee);
         return;
     }
     fprintf(stderr, "Error while creating employee");
@@ -143,8 +167,7 @@ void loadFromFile() {
         if (sscanf(fileLine, formatString, &id, name, &age, &salary) == 4) {
             if (isIdUnique(id)) {
                 newEmployee = Create_employee(id, name, age, salary);
-                employeeList[numOfEmployees] = *newEmployee;
-                numOfEmployees++;
+                addEmployeeToList(newEmployee);
                 linesLoaded++;
             } else {
                 linesNotLoaded++;

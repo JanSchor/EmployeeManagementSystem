@@ -4,6 +4,7 @@
 #ifndef HELP_LIB_H
 #define HELP_LIB_h
 
+int initEmployeeList();
 int isIdUnique(int id);
 void getInputDigit(char inputText[100], int* destination);
 int lowestPossibleId();
