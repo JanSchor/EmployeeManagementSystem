@@ -1,0 +1,12 @@
+0|Example one|66|32000.000000
+1|Example two|70|100000.000000
+2|Example three|25|25000.000000
+3|Example four|36|90000.000000
+4|Example five|45|50000.000000
+5|Example six|55|70000.000000
+6|Example seven|60|80000.000000
+7|Example eight|40|60000.000000
+8|Example nine|50|75000.000000
+9|Example ten|35|85000.000000
+10|Example eleven|30|20000.000000
+11|Example twelve|20|65000.000000

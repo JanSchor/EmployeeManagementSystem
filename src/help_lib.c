@@ -190,6 +190,7 @@ void loadFromFile() {
     }
     printf("Lines succesfully loaded: %d\n", linesLoaded);
     printf("Lines that failed to load: %d\n", linesNotLoaded);
+    fclose(fileLoad);
 }
 
 void freeAllEmployees() {

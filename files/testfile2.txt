@@ -2,4 +2,4 @@
 1|Michael Scott|30|20000.000000
 wrong line
 2|Frank Black|66|32000.000000
-2|David Smith|70|100000.000000
+2|Duplicit id|70|100000.000000

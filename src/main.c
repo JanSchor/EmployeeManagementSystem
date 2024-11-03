@@ -40,12 +40,3 @@ int main() {
     printf("Goodbye!\n");
     return 0;
 }
-
-/*
-Handle these errors:
-
-name to be less than 50 chars
-name to not contain pipe character
-salary to be float or number
-extra chars at digit input
-*/
