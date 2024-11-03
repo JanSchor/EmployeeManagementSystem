@@ -36,6 +36,7 @@ int main() {
                 break;
         }
     }
+    freeAllEmployees();
     printf("Goodbye!\n");
     return 0;
 }

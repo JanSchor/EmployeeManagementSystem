@@ -14,5 +14,6 @@ void displayEmployees();
 void searchEmployeeById();
 void saveToFile();
 void loadFromFile();
+void freeAllEmployees();
 
 #endif // HELP_LIB_H

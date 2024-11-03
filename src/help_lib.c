@@ -7,11 +7,12 @@
 #include "config.h"
 
 int numOfEmployees = 0;
-//Employee employeeList[100];
-Employee* employeeList = NULL;
+Employee** employeeList = NULL;
 
+// This function is called once from main at the start of programm.
+// Initializes and sets the memory for employeeList
 int initEmployeeList() {
-    employeeList = (Employee*)malloc(sizeof(Employee)*10);
+    employeeList = (Employee**)malloc(sizeof(Employee*)*10);
     if (!employeeList) {
         fprintf(stderr, "Failed to allocate memory for employeeList!\n");
         return 1;
@@ -19,27 +20,30 @@ int initEmployeeList() {
     return 0;
 }
 
+// Adds new employee to list, dynamic handeling included
 void addEmployeeToList(Employee* employee) {
     static int allocationSize = 10;
     if (numOfEmployees >= allocationSize) {
         allocationSize *= 2;
-        employeeList = (Employee*)realloc(employeeList, sizeof(Employee) * allocationSize);
+        employeeList = (Employee**)realloc(employeeList, sizeof(Employee*) * allocationSize);
         if (!employeeList) {
             fprintf(stderr, "Failed to allocate memory for employeeList, employee not added!\n");
         }
     }
-    employeeList[numOfEmployees] = *employee;
+    employeeList[numOfEmployees] = employee;
     numOfEmployees++;
-    printf("Employee added successfully");
+    printf("Employee added successfully\n");
 }
 
+// Check for unique ID inside employeeList
 int isIdUnique(int id) {
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
-        if (employeeList[empIdx].id == id) return 0;
+        if (employeeList[empIdx]->id == id) return 0;
     }
     return 1;
 }
 
+// Scans users input and return the number from it. Handles some user errors.
 void getInputDigit(char inputText[100], int* destination) {
     printf("%s", inputText);
     while (scanf("%d", destination) != 1) {
@@ -48,6 +52,7 @@ void getInputDigit(char inputText[100], int* destination) {
     }
 }
 
+// Finds lowest ID that is not occupied
 int lowestPossibleId() {
     for (int empIdx = 0; numOfEmployees+1; empIdx++) {
         if (isIdUnique(empIdx)) return empIdx;
@@ -55,6 +60,7 @@ int lowestPossibleId() {
     return -1;
 }
 
+// Prints main menu
 void printMainMenu() {
     printf(
         "\nEmployee Management System\n"
@@ -68,6 +74,7 @@ void printMainMenu() {
     );
 }
 
+// Add employee dialog
 void addEmployee() {
     int id;
     char name[MAX_NAME_LENGTH];
@@ -96,34 +103,36 @@ void addEmployee() {
 
     Employee *newEmployee = Create_employee(id, name, age, salary);
     if (newEmployee != NULL) {
-        //employeeList[numOfEmployees] = *newEmployee;
         addEmployeeToList(newEmployee);
         return;
     }
-    fprintf(stderr, "Error while creating employee");
+    fprintf(stderr, "Error while creating employee!\n");
 }
 
+// Displays all the employees from list
 void displayEmployees() {
     printf("ID\tName\tAge\tSalary\n");
     printf("------------------------------\n");
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
-        printEmployeeInfo(&employeeList[empIdx]);
+        printEmployeeInfo(employeeList[empIdx]);
     }
 }
 
+// Searches for given employee by id from user input
 void searchEmployeeById() {
     int searchedId;
     int empFound = 0;
     getInputDigit("Enter employee ID to search: ", &searchedId);
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
-        if (employeeList[empIdx].id == searchedId) {
-            printEmployeeInfo(&employeeList[empIdx]);
+        if (employeeList[empIdx]->id == searchedId) {
+            printEmployeeInfo(employeeList[empIdx]);
             break;
         }
     }
     if (!empFound) printf("No employee with this ID found!\n");
 }
 
+// Saves all employees to gile in this format: id|name|age|salary
 void saveToFile() {
     char fileNameH[MAX_FILE_NAME_LENGTH];
     char fileNameSave[MAX_FILE_NAME_LENGTH+16];
@@ -133,14 +142,15 @@ void saveToFile() {
     FILE* fileSave = fopen(fileNameSave, "w");
     for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
         fprintf(fileSave, "%d|%s|%d|%f\n",
-            employeeList[empIdx].id, employeeList[empIdx].name,
-            employeeList[empIdx].age, employeeList[empIdx].salary
+            employeeList[empIdx]->id, employeeList[empIdx]->name,
+            employeeList[empIdx]->age, employeeList[empIdx]->salary
         );
     }
     fclose(fileSave);
     printf("File created succesfully!\n");
 }
 
+// Loads employees from file, check for right format
 void loadFromFile() {
     char loadFilePath[MAX_FILE_PATH_LENGTH];
     printf("Enter file path: ");
@@ -180,4 +190,12 @@ void loadFromFile() {
     }
     printf("Lines succesfully loaded: %d\n", linesLoaded);
     printf("Lines that failed to load: %d\n", linesNotLoaded);
+}
+
+void freeAllEmployees() {
+    for (int empIdx = 0; empIdx < numOfEmployees; empIdx++) {
+        Destroy_employee(employeeList[empIdx]);
+    }
+    free(employeeList);
+    employeeList = NULL;
 }
